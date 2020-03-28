@@ -60,22 +60,6 @@ pub fn combinations<I>(iter: I, k: usize) -> Combinations<I>
     }
 }
 
-/// Create a new `Combinations` from a clonable iterator.
-pub fn combinations_v(iter: Vec<usize>, k: usize) -> Combinations<std::vec::IntoIter<usize>>
-{
-    let pool: Vec<usize> = iter;
-    let n = pool.len();
-
-    Combinations {
-        first: true,
-        n,
-        k,
-        indices: (0..k).collect(),
-        pool,
-        stack: Stack::Empty
-    }
-}
-
 impl<I> Iterator for Combinations<I>
     where I: Iterator,
           I::Item: Clone
