@@ -91,7 +91,7 @@ impl<I> Iterator for Combinations<I>
         // A reduced pool that has all values except the k values selected in this combination
         let remaining: Vec<usize> = (0..self.n).filter(|j| !self.indices.contains(j)).collect::<Vec<usize>>();
         if self.n - self.k > 0 {
-          let new_node = Box::new(combinations_v(remaining, self.k));
+          let new_node = Box::new(remaining.into_iter().combinations(self.k));
           self.stack = Stack::More(new_node);
         }
       }
@@ -107,35 +107,30 @@ impl<I> Iterator for Combinations<I>
         },
         Stack::More(it) => match it.next() {
           None => { 
-            while self.indices[i] == i + self.pool.len() - self.indices.len() {
+            while self.indices[i] == i + self.n - self.k {
               // Call next
-              if i > 0 {
+              if i > 1 {
                   i -= 1;
               } else {
                 // Reached the last combination
                 return None;
               }
             }
-            self.indices[i] += 1;
-            for j in i+1..self.indices.len() {
-                self.indices[j] = self.indices[j - 1] + 1;
-            }
 
-            if i == 0 {
-              return None;
-            }      
+            self.indices[i] += 1;
+            for j in i+1..self.k {
+                self.indices[j] = self.indices[j - 1] + 1;
+            }  
 
             // A reduced pool that has all values except the k values selected in this combination
             let remaining: Vec<usize> = (0..self.n).filter(|j| !self.indices.contains(j)).collect();
-            if (self.n - self.k) > 0 {
-              let mut combo = combinations_v(remaining, self.k);
-              match combo.next() {
-                None => (),
-                Some(x) => next_groups = x,
-              };
-              let new_node = Box::new(combo);
-              self.stack = Stack::More(new_node);
-            }
+            let mut combo = remaining.into_iter().combinations(self.k);
+            match combo.next() {
+              None => (),
+              Some(x) => next_groups = x,
+            };
+            let new_node = Box::new(combo);
+            self.stack = Stack::More(new_node);
 
           },
           Some(x) => {
