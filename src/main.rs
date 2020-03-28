@@ -3,7 +3,17 @@ mod impl_macros;
 mod divisions;
 mod lazy_buffer;
 
+use divisions::Combinable;
+use std::time::Instant;
+
 fn main() {
-  let it = (1..5).into_iter().combinations(3).collect();
-  println!("Hello, world! {:?}", it);
+  let now = Instant::now();
+  let a = (0..12).combinations(3);
+  let it: Vec<Vec<Vec<u32>>> = a.collect();
+  println!("oijoi {:?}", it.len());
+  println!("{}", now.elapsed().as_millis());
+  /*let it2 = a.next();
+  println!("oijoi2 {:?}", it2);
+  let it3 = a.next();
+  println!("oijoi3 {:?}", it3);*/
 }
