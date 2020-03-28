@@ -79,6 +79,7 @@ impl<I> Iterator for Combinations<I>
           return None;
         }
 
+        // A reduced pool that has all values except the k values selected in this combination
         let remaining: Vec<usize> = (0..self.pool.len()).filter(|j| !self.indices.contains(j)).collect::<Vec<usize>>();
         if remaining.len() > 0 {
           let new_node = Box::new(remaining.into_iter().combinations(self.k));
@@ -111,6 +112,7 @@ impl<I> Iterator for Combinations<I>
                 self.indices[j] = self.indices[j - 1] + 1;
             }
 
+            // A reduced pool that has all values except the k values selected in this combination
             let remaining: Vec<usize> = (0..self.pool.len()).filter(|j| !self.indices.contains(j)).collect::<Vec<usize>>();
             if remaining.len() > 0 {
               let mut combo = remaining.into_iter().combinations(self.k);
@@ -135,6 +137,7 @@ impl<I> Iterator for Combinations<I>
       }
 
       let curr_values: Vec<I::Item> = self.indices.iter().map(|i| self.pool[*i].clone()).collect();
+      // Map next_values (an array of arrays) indexes to their values
       let next_values = next_groups.iter().map(
         |set| set.iter().map(
           |i| self.pool[*i].clone()
