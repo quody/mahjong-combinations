@@ -1,5 +1,4 @@
 use std::fmt;
-use super::lazy_buffer::LazyBuffer;
 
 /// An iterator to iterate through all the `k`-length combinations in an iterator.
 ///
@@ -23,7 +22,8 @@ impl Clone for Stack
 #[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
 pub struct Combinations<I: Iterator> {
     indices: Vec<usize>,
-    pool: LazyBuffer<I>,
+    pool: Vec<I::Item>,
+    n: usize,
     first: bool,
     k: usize,
     stack: Stack,
@@ -33,7 +33,7 @@ impl<I> Clone for Combinations<I>
     where I: Clone + Iterator,
           I::Item: Clone,
 {
-    clone_fields!(indices, pool, first, k, stack);
+    clone_fields!(indices, pool, first, k, stack, n);
 }
 
 impl<I> fmt::Debug for Combinations<I>
@@ -47,17 +47,13 @@ impl<I> fmt::Debug for Combinations<I>
 pub fn combinations<I>(iter: I, k: usize) -> Combinations<I>
     where I: Iterator
 {
-    let mut pool: LazyBuffer<I> = LazyBuffer::new(iter);
-
-    for _ in 0..k {
-        if !pool.get_next() {
-            break;
-        }
-    }
+    let pool: Vec<I::Item> = iter.into_iter().collect();
+    let n = pool.len();
 
     Combinations {
         indices: (0..k).collect(),
         pool,
+        n,
         first: true,
         k,
         stack: Stack::Empty
@@ -68,19 +64,16 @@ impl<I> Iterator for Combinations<I>
     where I: Iterator,
           I::Item: Clone
 {
-    type Item = Vec<Vec<I::Item>>; //, Vec<I::Item>);
+    type Item = Vec<I::Item>; //, Vec<I::Item>);
     fn next(&mut self) -> Option<Self::Item> {
       if self.first {
-        while self.pool.get_next() {
-        }
-
         let l = self.pool.len();
         if l % self.k != 0 || l < self.k {
           return None;
         }
 
         // A reduced pool that has all values except the k values selected in this combination
-        let remaining: Vec<usize> = (0..self.pool.len()).filter(|j| !self.indices.contains(j)).collect::<Vec<usize>>();
+        let remaining: Vec<usize> = (0..self.n).filter(|j| !self.indices.contains(j)).collect::<Vec<usize>>();
         if remaining.len() > 0 {
           let new_node = Box::new(remaining.into_iter().combinations(self.k));
           self.stack = Stack::More(new_node);
@@ -88,7 +81,7 @@ impl<I> Iterator for Combinations<I>
       }
       
       let mut i: usize = self.indices.len() - 1;
-      let mut next_groups: Vec<Vec<usize>> = vec![];
+      let mut next_groups: Vec<usize> = vec![];
       
       match &mut self.stack {
         Stack::Empty => {
@@ -113,12 +106,12 @@ impl<I> Iterator for Combinations<I>
             }
 
             // A reduced pool that has all values except the k values selected in this combination
-            let remaining: Vec<usize> = (0..self.pool.len()).filter(|j| !self.indices.contains(j)).collect::<Vec<usize>>();
-            if remaining.len() > 0 {
+            let remaining: Vec<usize> = (0..self.n).filter(|j| !self.indices.contains(j)).collect();
+            if (self.n - self.k) > 0 {
               let mut combo = remaining.into_iter().combinations(self.k);
-              next_groups = match combo.next() {
-                None => vec![],
-                Some(x) => x
+              match combo.next() {
+                None => (),
+                Some(x) => next_groups = x,
               };
               let new_node = Box::new(combo);
               self.stack = Stack::More(new_node);
@@ -136,15 +129,12 @@ impl<I> Iterator for Combinations<I>
         return None;
       }
 
-      let curr_values: Vec<I::Item> = self.indices.iter().map(|i| self.pool[*i].clone()).collect();
+      let mut curr_values: Vec<I::Item> = self.indices.iter().map(|i| self.pool[*i].clone()).collect();
       // Map next_values (an array of arrays) indexes to their values
-      let next_values = next_groups.iter().map(
-        |set| set.iter().map(
-          |i| self.pool[*i].clone()
-        ).collect()).collect();
-      let all_values = vec![vec![curr_values], next_values].concat();
+      let mut next_values: Vec<I::Item> = next_groups.iter().map(|i| self.pool[*i].clone()).collect();
+      curr_values.append(&mut next_values);
       self.first = false;
-      Some(all_values)
+      Some(curr_values)
     }
 }
 

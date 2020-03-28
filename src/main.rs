@@ -1,7 +1,6 @@
 #[macro_use]
 mod impl_macros;
 mod divisions;
-mod lazy_buffer;
 
 use divisions::Combinable;
 //use itertools::Itertools;
@@ -9,8 +8,8 @@ use std::time::Instant;
 
 fn main() {
   let now = Instant::now();
-  let a = (0..12).combinations(3);
-  let it: Vec<Vec<Vec<u32>>> = a.collect();
+  let a = (0..15).combinations(3);
+  let it: Vec<Vec<u32>> = a.collect();
   //let it: Vec<Vec<u32>> = a.collect();
   println!("oijoi {:?}", it.len());
   println!("{}", now.elapsed().as_millis());
