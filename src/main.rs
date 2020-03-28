@@ -1,6 +1,9 @@
+#![feature(test)]
 #[macro_use]
 mod impl_macros;
 mod divisions;
+mod tests;
+extern crate test;
 
 use divisions::Combinable;
 //use itertools::Itertools;

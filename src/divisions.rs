@@ -21,12 +21,12 @@ impl Clone for Stack
 
 #[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
 pub struct Combinations<I: Iterator> {
-    indices: Vec<usize>,
-    pool: Vec<I::Item>,
-    n: usize,
-    first: bool,
-    k: usize,
-    stack: Stack,
+  indices: Vec<usize>,
+  pool: Vec<I::Item>,
+  stack: Stack,
+  n: usize,
+  first: bool,
+  k: usize,
 }
 
 impl<I> Clone for Combinations<I>
@@ -60,6 +60,22 @@ pub fn combinations<I>(iter: I, k: usize) -> Combinations<I>
     }
 }
 
+/// Create a new `Combinations` from a clonable iterator.
+pub fn combinations_v(iter: Vec<usize>, k: usize) -> Combinations<std::vec::IntoIter<usize>>
+{
+    let pool: Vec<usize> = iter;
+    let n = pool.len();
+
+    Combinations {
+        first: true,
+        n,
+        k,
+        indices: (0..k).collect(),
+        pool,
+        stack: Stack::Empty
+    }
+}
+
 impl<I> Iterator for Combinations<I>
     where I: Iterator,
           I::Item: Clone
@@ -74,13 +90,13 @@ impl<I> Iterator for Combinations<I>
 
         // A reduced pool that has all values except the k values selected in this combination
         let remaining: Vec<usize> = (0..self.n).filter(|j| !self.indices.contains(j)).collect::<Vec<usize>>();
-        if remaining.len() > 0 {
-          let new_node = Box::new(remaining.into_iter().combinations(self.k));
+        if self.n - self.k > 0 {
+          let new_node = Box::new(combinations_v(remaining, self.k));
           self.stack = Stack::More(new_node);
         }
       }
       
-      let mut i: usize = self.indices.len() - 1;
+      let mut i: usize = self.k - 1;
       let mut next_groups: Vec<usize> = vec![];
       
       match &mut self.stack {
@@ -105,10 +121,14 @@ impl<I> Iterator for Combinations<I>
                 self.indices[j] = self.indices[j - 1] + 1;
             }
 
+            if i == 0 {
+              return None;
+            }      
+
             // A reduced pool that has all values except the k values selected in this combination
             let remaining: Vec<usize> = (0..self.n).filter(|j| !self.indices.contains(j)).collect();
             if (self.n - self.k) > 0 {
-              let mut combo = remaining.into_iter().combinations(self.k);
+              let mut combo = combinations_v(remaining, self.k);
               match combo.next() {
                 None => (),
                 Some(x) => next_groups = x,
@@ -120,20 +140,17 @@ impl<I> Iterator for Combinations<I>
           },
           Some(x) => {
             next_groups = x;
-            // self.stack = Stack::More(it);
           },
         }
-      }
-
-      if i == 0 {
-        return None;
       }
 
       let mut curr_values: Vec<I::Item> = self.indices.iter().map(|i| self.pool[*i].clone()).collect();
       // Map next_values (an array of arrays) indexes to their values
       let mut next_values: Vec<I::Item> = next_groups.iter().map(|i| self.pool[*i].clone()).collect();
       curr_values.append(&mut next_values);
-      self.first = false;
+      if self.first { 
+        self.first = false; 
+      }
       Some(curr_values)
     }
 }
