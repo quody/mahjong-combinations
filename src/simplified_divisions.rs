@@ -85,7 +85,7 @@ pub fn yolo_main() {
       // First set in index 0,1,2 second 3,4,5 etc.
       let values: Vec<Tiles> = p.iter().map(|i| c[*i].clone()).collect();
       if values[0] != values[1] {
-        println!("shanten probably atleast 1");
+        // println!("first set is not a triplet");
       }
     }
   }
