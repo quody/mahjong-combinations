@@ -2,11 +2,14 @@
 #[macro_use]
 mod impl_macros;
 mod divisions;
+mod divisions_with_split;
 mod simplified_divisions;
 mod tests;
+mod lazy_buffer;
 extern crate test;
 
 use divisions::Combinable;
+use divisions_with_split::CombinableWithSplit;
 //use itertools::Itertools;
 use std::time::Instant;
 

@@ -1,8 +1,9 @@
+use crate::divisions_with_split::CombinableWithSplit;
 use itertools::Itertools;
 use std::time::Instant;
 
 #[derive(Copy, Clone, PartialEq)]
-enum Tiles {
+pub enum Tiles {
   M1,
   M2,
   M3,
@@ -78,19 +79,17 @@ pub fn yolo_main() {
   let now = Instant::now();
   let presets: Vec<Vec<usize>> = generate();
   let hand: Vec<Tiles> = vec![Tiles::M1, Tiles::M1, Tiles::M2, Tiles::M4, Tiles::M6, Tiles::M9, Tiles::S4, Tiles::S1, Tiles::S4, Tiles::S9, Tiles::W, Tiles::Wh, Tiles::N, Tiles::S];
-  for c in hand.clone().into_iter().combinations(12) {
-    let pair: Vec<Tiles>; // I dunno, just figure this out somehow. Maybe integrate into itertools combinations for best performance
+  for [c, pair] in hand.clone().into_iter().combinations_with_split(12) {
     for p in presets.clone() {
       let shanten = 0;
       // First set in index 0,1,2 second 3,4,5 etc.
       let values: Vec<Tiles> = p.iter().map(|i| c[*i].clone()).collect();
-      if values[0] != values[1] {
-        // println!("first set is not a triplet");
+      if pair[0] != pair[1] {
+        // println!("Not even a pair! GG!");
       }
     }
   }
   println!("Amount of sets per selected pair {:?}", presets.len());
   println!("{}ms", now.elapsed().as_millis());
-  
 }
 
