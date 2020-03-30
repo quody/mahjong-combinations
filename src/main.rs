@@ -15,9 +15,10 @@ fn main() {
   let a = (0..12).combinations(3);
   let it: Vec<Vec<u32>> = a.collect();
   //let it: Vec<Vec<u32>> = a.collect();
-  println!("oijoi {:?}", it.len());
-  println!("{}", now.elapsed().as_millis());
-  println!("try simplified");
+  println!("Generating index variations with nice code:");
+  println!("Amount of sets {}", it.len());
+  println!("{}ms", now.elapsed().as_millis());
+  println!("Generate hand variations (index variations x91) with simplified algo:");
   simplified_divisions::yolo_main();
   /*let it2 = a.next();
   println!("oijoi2 {:?}", it2);
