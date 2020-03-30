@@ -83,7 +83,7 @@ pub fn yolo_main() {
     for p in presets.clone() {
       let shanten = 0;
       // First set in index 0,1,2 second 3,4,5 etc.
-      let values: Vec<Tiles> = p.iter().map(|i| c[*i].clone()).collect();
+      let sets: Vec<Tiles> = p.iter().map(|i| c[*i].clone()).collect();
       if pair[0] != pair[1] {
         // println!("Not even a pair! GG!");
       }
