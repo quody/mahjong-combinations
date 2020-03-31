@@ -1,30 +1,20 @@
 #![feature(test)]
+#![feature(step_trait)]
 #[macro_use]
 mod impl_macros;
-mod divisions;
-mod divisions_with_split;
-mod simplified_divisions;
+mod partition_combinations;
+mod combinations_with_split;
+mod mahjong_logic;
 mod tests;
 mod lazy_buffer;
 extern crate test;
 
-use divisions::Combinable;
-use divisions_with_split::CombinableWithSplit;
-//use itertools::Itertools;
-use std::time::Instant;
+use mahjong_logic::{Tiles, get_shanten};
 
-fn main() {
-  let now = Instant::now();
-  let a = (0..12).combinations(3);
-  let it: Vec<Vec<u32>> = a.collect();
-  //let it: Vec<Vec<u32>> = a.collect();
-  println!("Generating index variations with nice code:");
-  println!("Amount of sets {}", it.len());
-  println!("{}ms", now.elapsed().as_millis());
-  println!("Generate hand variations (index variations x91) with simplified algo:");
-  simplified_divisions::yolo_main();
-  /*let it2 = a.next();
-  println!("oijoi2 {:?}", it2);
-  let it3 = a.next();
-  println!("oijoi3 {:?}", it3);*/
+pub fn main() {
+  // Please use 14 tiles for now =)
+  // let hand: Vec<Tiles> = vec![Tiles::M1, Tiles::M1, Tiles::M1, Tiles::M4, Tiles::M6, Tiles::M9, Tiles::S4, Tiles::S1, Tiles::S4, Tiles::S9, Tiles::W, Tiles::Wh, Tiles::N, Tiles::S];
+  let hand: Vec<Tiles> = vec![Tiles::P4, Tiles::P5, Tiles::P6, Tiles::M1, Tiles::M1, Tiles::M1, Tiles::S2, Tiles::S4, Tiles::S6, Tiles::S, Tiles::S, Tiles::Wh, Tiles::Wh, Tiles::G];
+  get_shanten(hand)
 }
+

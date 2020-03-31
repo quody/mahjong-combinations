@@ -6,7 +6,7 @@ use std::fmt;
 
 pub enum Stack {
   Empty,
-  More(Box<Combinations<std::vec::IntoIter<usize>>>),
+  More(Box<PartitionCombinations<std::vec::IntoIter<usize>>>),
 }
 
 impl Clone for Stack
@@ -20,7 +20,7 @@ impl Clone for Stack
 }
 
 #[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
-pub struct Combinations<I: Iterator> {
+pub struct PartitionCombinations<I: Iterator> {
   indices: Vec<usize>,
   pool: Vec<I::Item>,
   stack: Stack,
@@ -29,14 +29,14 @@ pub struct Combinations<I: Iterator> {
   k: usize,
 }
 
-impl<I> Clone for Combinations<I>
+impl<I> Clone for PartitionCombinations<I>
     where I: Clone + Iterator,
           I::Item: Clone,
 {
     clone_fields!(indices, pool, first, k, stack, n);
 }
 
-impl<I> fmt::Debug for Combinations<I>
+impl<I> fmt::Debug for PartitionCombinations<I>
     where I: Iterator + fmt::Debug,
           I::Item: fmt::Debug,
 {
@@ -44,13 +44,13 @@ impl<I> fmt::Debug for Combinations<I>
 }
 
 /// Create a new `Combinations` from a clonable iterator.
-pub fn combinations<I>(iter: I, k: usize) -> Combinations<I>
+pub fn partition_combinations<I>(iter: I, k: usize) -> PartitionCombinations<I>
     where I: Iterator
 {
     let pool: Vec<I::Item> = iter.into_iter().collect();
     let n = pool.len();
 
-    Combinations {
+    PartitionCombinations {
         indices: (0..k).collect(),
         pool,
         n,
@@ -60,7 +60,7 @@ pub fn combinations<I>(iter: I, k: usize) -> Combinations<I>
     }
 }
 
-impl<I> Iterator for Combinations<I>
+impl<I> Iterator for PartitionCombinations<I>
     where I: Iterator,
           I::Item: Clone
 {
@@ -75,7 +75,7 @@ impl<I> Iterator for Combinations<I>
         // A reduced pool that has all values except the k values selected in this combination
         let remaining: Vec<usize> = (0..self.n).filter(|j| !self.indices.contains(j)).collect::<Vec<usize>>();
         if self.n - self.k > 0 {
-          let new_node = Box::new(remaining.into_iter().combinations(self.k));
+          let new_node = Box::new(remaining.into_iter().partition_combinations(self.k));
           self.stack = Stack::More(new_node);
         }
       }
@@ -108,7 +108,7 @@ impl<I> Iterator for Combinations<I>
 
             // A reduced pool that has all values except the k values selected in this combination
             let remaining: Vec<usize> = (0..self.n).filter(|j| !self.indices.contains(j)).collect();
-            let mut combo = remaining.into_iter().combinations(self.k);
+            let mut combo = remaining.into_iter().partition_combinations(self.k);
             match combo.next() {
               None => (),
               Some(x) => next_groups = x,
@@ -134,20 +134,34 @@ impl<I> Iterator for Combinations<I>
     }
 }
 
-pub trait Combinable<I> 
+pub trait PartitionCombinable<I> 
   where I: Iterator
 {
-  fn combinations(self, k: usize) -> Combinations<I>;
+  fn partition_combinations(self, k: usize) -> PartitionCombinations<I>;
 }
 
-impl Combinable<std::ops::Range<u32>> for std::ops::Range<u32> {
-  fn combinations(self, k: usize) -> Combinations<std::ops::Range<u32>> {
-    combinations(self, k)
+/*impl PartitionCombinable<std::ops::Range<u32>> for std::ops::Range<u32> {
+  fn partition_combinations(self, k: usize) -> PartitionCombinations<std::ops::Range<u32>> {
+    partition_combinations(self, k)
   }
 }
 
-impl Combinable<std::vec::IntoIter<usize>> for std::vec::IntoIter<usize> {
-  fn combinations(self, k: usize) -> Combinations<std::vec::IntoIter<usize>> {
-    combinations(self, k)
+impl PartitionCombinable<std::ops::Range<usize>> for std::ops::Range<usize> {
+  fn partition_combinations(self, k: usize) -> PartitionCombinations<std::ops::Range<usize>> {
+    partition_combinations(self, k)
+  }
+}*/
+
+impl<T> PartitionCombinable<std::ops::Range<T>> for std::ops::Range<T> 
+  where T: std::iter::Step,
+  {
+  fn partition_combinations(self, k: usize) -> PartitionCombinations<std::ops::Range<T>> {
+    partition_combinations(self, k)
+  }
+}
+
+impl<T> PartitionCombinable<std::vec::IntoIter<T>> for std::vec::IntoIter<T> {
+  fn partition_combinations(self, k: usize) -> PartitionCombinations<std::vec::IntoIter<T>> {
+    partition_combinations(self, k)
   }
 }

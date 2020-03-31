@@ -1,6 +1,6 @@
 #![feature(test)]
 
-use crate::divisions::Combinable;
+use crate::partition_combinations::PartitionCombinable;
 use test::Bencher;
 
 #[cfg(test)]
@@ -10,8 +10,8 @@ mod tests {
 
   #[test]
   fn tiles_12() {
-    let a = (0..12).combinations(3);
-    let it: usize = a.collect::<Vec<Vec<u32>>>().len();
+    let a = (0..12).partition_combinations(3);
+    let it: usize = a.collect::<Vec<Vec<i32>>>().len();
     assert_eq!(it, 15400);
   }
   
