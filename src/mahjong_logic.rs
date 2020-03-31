@@ -84,7 +84,7 @@ pub fn get_shanten(hand: Vec<Tiles>)
   println!("{}ms", now.elapsed().as_millis());
   let mut min_s = 14;
   let mut best_hand: Vec<Vec<Tiles>> = vec![];
-  for [c, pair] in pair_splits {
+  for [c, pair] in &pair_splits {
     for p in &presets {
       // First set in index 0,1,2 second 3,4,5 etc.
       let sets: Vec<Tiles> = p.iter().map(|i| c[*i].clone()).collect();
