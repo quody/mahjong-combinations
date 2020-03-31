@@ -79,12 +79,13 @@ pub fn get_shanten(hand: Vec<Tiles>)
   let now = Instant::now();
   let index_iterator: std::ops::Range<usize> = (0..12).into_iter();
   let presets: Vec<Vec<usize>> = index_iterator.partition_combinations(3).collect::<Vec<Vec<usize>>>();
-  println!("Presets {:?}", presets.len());
+  let pair_splits: Vec<[Vec<Tiles>; 2]> = hand.clone().into_iter().combinations_with_split(12).collect::<Vec<[Vec<Tiles>; 2]>>();
+  println!("Presets {:?} + {:?}", presets.len(), pair_splits.len());
   println!("{}ms", now.elapsed().as_millis());
   let mut min_s = 14;
   let mut best_hand: Vec<Vec<Tiles>> = vec![];
-  for [c, pair] in hand.clone().into_iter().combinations_with_split(12) {
-    for p in presets.clone() {
+  for [c, pair] in pair_splits {
+    for p in &presets {
       // First set in index 0,1,2 second 3,4,5 etc.
       let sets: Vec<Tiles> = p.iter().map(|i| c[*i].clone()).collect();
       let mut s = shanten_helper(&sets);
@@ -100,7 +101,7 @@ pub fn get_shanten(hand: Vec<Tiles>)
   }
   println!("Analysis ok.");
   println!("Minimum {}-shanten {:?}", min_s, best_hand);
-  println!("{}ms", now.elapsed().as_millis());
+  println!("{}ms (total)", now.elapsed().as_millis());
 }
 
 fn shanten_helper(set: &Vec<Tiles>) -> u32 {
