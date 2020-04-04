@@ -1,5 +1,3 @@
-#![feature(test)]
-
 use crate::partition_combinations::PartitionCombinable;
 use test::Bencher;
 
