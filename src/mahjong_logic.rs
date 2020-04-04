@@ -1,6 +1,28 @@
+use std::collections::HashMap;
 use std::time::Instant;
+use enum_iterator::IntoEnumIterator;
 use crate::combinations_with_split::CombinableWithSplit;
 use crate::partition_combinations::PartitionCombinable;
+
+pub struct Deck {
+  pub tiles: std::collections::HashMap<Tiles, u32>,
+}
+
+impl Deck {
+  pub fn init(&mut self) {
+    for tile in Tiles::into_enum_iter()
+    {
+      self.tiles.insert(tile, 4);
+    }
+  }
+
+  pub fn remove_tiles(&mut self, tiles: &Vec<Tiles>)
+  {
+    for tile in tiles {
+      self.tiles.insert(*tile, self.tiles.get(tile).unwrap() - 1);
+    }
+  }
+}
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Suites {
@@ -10,7 +32,7 @@ pub enum Suites {
   N // None
 }
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, IntoEnumIterator)]
 pub enum Tiles {
   M1,
   M2,
@@ -74,7 +96,7 @@ fn get_suite(tile: Tiles) -> Suites
   }
 }
 
-pub fn get_shanten(hand: Vec<Tiles>)
+pub fn get_shanten(hand: &Vec<Tiles>)
 {
   let now = Instant::now();
   let index_iterator: std::ops::Range<usize> = (0..12).into_iter();
@@ -150,5 +172,19 @@ pub fn straight_analysis(set: &Vec<Tiles>, i: usize) -> u32
     return 1;
   }
   return 0;
+}
+
+fn complete_set(set: &Vec<Tiles>, i: usize) -> &Vec<Tiles>
+{
+  if (triplet_analysis(set, i) == 2 || straight_analysis(set, i) == 2)
+  {
+    return 1; // Set is 100% complete
+  }
+  // Triplet
+  // Primary
+  for i in (0..2)
+  {
+    
+  }
 }
 
